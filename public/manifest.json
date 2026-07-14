@@ -1,0 +1,16 @@
+{
+  "name": "FramingAnalyser — Critical Discourse Analysis",
+  "short_name": "FramingAnalyser",
+  "description": "Detect prejudicial and asymmetric framing in journalism and commentary using van Dijk's Ideological Square and Entman's Framing Theory.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F6F2",
+  "theme_color": "#0D1B2A",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
