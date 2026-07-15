@@ -13,6 +13,7 @@ export function InputScreen({
   setGroupB,
   onLoadPreset,
   onAnalyse,
+  onClear,
 }: {
   text: string
   groupA: string
@@ -23,8 +24,10 @@ export function InputScreen({
   setGroupB: (v: string) => void
   onLoadPreset: (p: (typeof PRELOADS)[number]) => void
   onAnalyse: () => void
+  onClear: () => void
 }) {
   const ready = !!text.trim() && !!groupA.trim() && !!groupB.trim()
+  const hasInput = !!text || !!groupA || !!groupB
   const groups: [string, string, (v: string) => void, string, string][] = [
     ["Group A", groupA, setGroupA, C.blue, "e.g. Asylum seekers"],
     ["Group B", groupB, setGroupB, C.red, "e.g. Expats"],
@@ -116,29 +119,51 @@ export function InputScreen({
         </div>
       )}
 
-      <button
-        onClick={onAnalyse}
-        disabled={!ready}
-        style={{
-          width: "100%",
-          padding: "14px",
-          minHeight: 44,
-          background: ready ? C.ink : C.ruled,
-          color: ready ? C.paper : C.muted,
-          border: "none",
-          borderRadius: 3,
-          cursor: ready ? "pointer" : "not-allowed",
-          fontFamily: C.mono,
-          fontSize: 11,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          fontWeight: 600,
-          marginBottom: 32,
-          transition: "background 0.2s",
-        }}
-      >
-        ▶ &nbsp; Analyse Framing
-      </button>
+      <div style={{ display: "flex", gap: 12, marginBottom: 32 }}>
+        <button
+          onClick={onAnalyse}
+          disabled={!ready}
+          style={{
+            flex: 1,
+            padding: "14px",
+            minHeight: 44,
+            background: ready ? C.ink : C.ruled,
+            color: ready ? C.paper : C.muted,
+            border: "none",
+            borderRadius: 3,
+            cursor: ready ? "pointer" : "not-allowed",
+            fontFamily: C.mono,
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+            transition: "background 0.2s",
+          }}
+        >
+          ▶ &nbsp; Analyse Framing
+        </button>
+        <button
+          onClick={onClear}
+          disabled={!hasInput}
+          style={{
+            padding: "14px 20px",
+            minHeight: 44,
+            background: "transparent",
+            color: hasInput ? C.red : C.ruled,
+            border: `1px solid ${hasInput ? `${C.red}66` : C.ruled}`,
+            borderRadius: 3,
+            cursor: hasInput ? "pointer" : "not-allowed",
+            fontFamily: C.mono,
+            fontSize: 11,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            fontWeight: 600,
+            transition: "color 0.2s, border-color 0.2s",
+          }}
+        >
+          Clear
+        </button>
+      </div>
 
       {/* Preloads */}
       <div>

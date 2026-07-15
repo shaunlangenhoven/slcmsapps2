@@ -54,6 +54,13 @@ export function FramingAnalyser({ user }: { user: { email: string; role: string 
     setScreen("report")
   }
 
+  function clearRequest() {
+    setText("")
+    setGroupA("")
+    setGroupB("")
+    setError("")
+  }
+
   function openHistory(h: HistoryEntry) {
     setResult(h.result)
     setGroupA(h.groupA)
@@ -132,6 +139,7 @@ export function FramingAnalyser({ user }: { user: { email: string; role: string 
             setGroupB={setGroupB}
             onLoadPreset={loadPreset}
             onAnalyse={runAnalysis}
+            onClear={clearRequest}
           />
         )}
 

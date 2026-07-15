@@ -10,6 +10,51 @@ import { Verdict } from "./verdict"
 
 const TABS = ["Overview", "Dimensions", "Rhetoric", "Recommendations"] as const
 
+function buildReportText(result: FramingResult, groupA: string, groupB: string, text: string) {
+  const lines: string[] = []
+  lines.push("FRAMING ANALYSIS REPORT")
+  lines.push(`${groupA} vs ${groupB}`)
+  lines.push("=".repeat(48))
+  lines.push("")
+  lines.push(`OVERALL VERDICT: ${result.overallVerdict}`)
+  lines.push(`Overall asymmetry score: ${(result.overallScore ?? 0).toFixed(2)}`)
+  lines.push("")
+  lines.push("EDITORIAL SUMMARY")
+  lines.push(result.overallSummary || "—")
+  if (result.theoreticalBasis) {
+    lines.push("")
+    lines.push("THEORETICAL BASIS")
+    lines.push(result.theoreticalBasis)
+  }
+  lines.push("")
+  lines.push("DIMENSIONS")
+  lines.push("-".repeat(48))
+  for (const d of result.dimensions ?? []) {
+    const dim = DIMENSIONS.find((x) => x.key === d.key)
+    lines.push(`• ${dim?.label ?? d.key} — ${d.asymmetryLevel} (${(d.asymmetryScore ?? 0).toFixed(2)})`)
+    if (d.analysis) lines.push(`  ${d.analysis}`)
+    if (d.evidenceA) lines.push(`  ${groupA}: "${d.evidenceA}"`)
+    if (d.evidenceB) lines.push(`  ${groupB}: "${d.evidenceB}"`)
+    lines.push("")
+  }
+  if (result.rhetoricalDevices?.length) {
+    lines.push("RHETORICAL DEVICES DETECTED")
+    lines.push("-".repeat(48))
+    result.rhetoricalDevices.forEach((d, i) => lines.push(`${String(i + 1).padStart(2, "0")}. ${d}`))
+    lines.push("")
+  }
+  if (result.editorialRecommendations) {
+    lines.push("EDITORIAL RECOMMENDATIONS")
+    lines.push("-".repeat(48))
+    lines.push(result.editorialRecommendations)
+    lines.push("")
+  }
+  lines.push("SOURCE TEXT")
+  lines.push("-".repeat(48))
+  lines.push(text)
+  return lines.join("\n")
+}
+
 export function ReportScreen({
   result,
   groupA,
@@ -24,6 +69,26 @@ export function ReportScreen({
   onReset: () => void
 }) {
   const [activeTab, setActiveTab] = useState(0)
+  const [copied, setCopied] = useState(false)
+
+  async function copyReport() {
+    const report = buildReportText(result, groupA, groupB, text)
+    try {
+      await navigator.clipboard.writeText(report)
+    } catch {
+      // Fallback for browsers/iframes without clipboard API access
+      const ta = document.createElement("textarea")
+      ta.value = report
+      ta.style.position = "fixed"
+      ta.style.opacity = "0"
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand("copy")
+      document.body.removeChild(ta)
+    }
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto" }}>
@@ -44,23 +109,43 @@ export function ReportScreen({
             {groupA} <span style={{ color: C.muted, fontWeight: 400, fontSize: 16 }}>vs</span> {groupB}
           </h2>
         </div>
-        <button
-          onClick={onReset}
-          style={{
-            padding: "10px 16px",
-            minHeight: 44,
-            background: "transparent",
-            border: `1px solid ${C.ruled}`,
-            borderRadius: 3,
-            cursor: "pointer",
-            fontFamily: C.mono,
-            fontSize: 10,
-            color: C.muted,
-            letterSpacing: "0.1em",
-          }}
-        >
-          ← New Analysis
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button
+            onClick={copyReport}
+            style={{
+              padding: "10px 16px",
+              minHeight: 44,
+              background: copied ? C.sageDim : "transparent",
+              border: `1px solid ${copied ? C.sage : C.ruled}`,
+              borderRadius: 3,
+              cursor: "pointer",
+              fontFamily: C.mono,
+              fontSize: 10,
+              color: copied ? C.sage : C.muted,
+              letterSpacing: "0.1em",
+              transition: "color 0.15s, background 0.15s, border-color 0.15s",
+            }}
+          >
+            {copied ? "✓ Copied" : "⧉ Copy Report"}
+          </button>
+          <button
+            onClick={onReset}
+            style={{
+              padding: "10px 16px",
+              minHeight: 44,
+              background: "transparent",
+              border: `1px solid ${C.ruled}`,
+              borderRadius: 3,
+              cursor: "pointer",
+              fontFamily: C.mono,
+              fontSize: 10,
+              color: C.muted,
+              letterSpacing: "0.1em",
+            }}
+          >
+            ← New Analysis
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
